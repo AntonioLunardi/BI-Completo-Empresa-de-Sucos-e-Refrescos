@@ -1,0 +1,133 @@
+//TOP E BOTTTOM
+
+// CONSULTA
+WITH MEMBER [Measures].[Faturamento de Vendas]
+AS
+'[Measures].[Faturamento]', FORMAT_STRING = "#,###.00"
+SELECT ({[Cliente].[Hierarquia Geográfica].[Nível Cidade].Members}) on rows,
+([Tempo].[Hierarquia do Mês e Ano].[Ano].&[2014]) on columns
+from [COMPLETO]
+WHERE [Measures].[Faturamento de Vendas]
+
+// ORDENADO
+WITH MEMBER [Measures].[Faturamento de Vendas]
+AS
+'[Measures].[Faturamento]', FORMAT_STRING = "#,###.00"
+SELECT 
+ORDER (
+{[Cliente].[Hierarquia Geográfica].[Nível Cidade].Members} 
+, [Measures].[Faturamento], BDESC)
+on rows,
+([Tempo].[Hierarquia do Mês e Ano].[Ano].&[2014]) on columns
+from [COMPLETO]
+WHERE [Measures].[Faturamento de Vendas]
+
+// TOP 3
+WITH MEMBER [Measures].[Faturamento de Vendas]
+AS
+'[Measures].[Faturamento]', FORMAT_STRING = "#,###.00"
+SELECT 
+ORDER ( 
+TopCount  (
+{[Cliente].[Hierarquia Geográfica].[Nível Cidade].Members} , 3, [Measures].[Faturamento]
+)
+, [Measures].[Faturamento], BDESC)
+on rows,
+([Tempo].[Hierarquia do Mês e Ano].[Ano].&[2014]) on columns
+from [COMPLETO]
+WHERE [Measures].[Faturamento de Vendas]
+
+// BOTTOM 3
+WITH MEMBER [Measures].[Faturamento de Vendas]
+AS
+'[Measures].[Faturamento]', FORMAT_STRING = "#,###.00"
+SELECT 
+ORDER ( 
+BottomCount  (
+{[Cliente].[Hierarquia Geográfica].[Nível Cidade].Members} , 3, [Measures].[Faturamento]
+)
+, [Measures].[Faturamento], BDESC)
+on rows,
+([Tempo].[Hierarquia do Mês e Ano].[Ano].&[2014]) on columns
+from [COMPLETO]
+WHERE [Measures].[Faturamento de Vendas]
+
+// RANK E COUNT
+
+// CONSULTA
+WITH
+MEMBER [Measures].[Faturamento de Vendas]
+AS
+'[Measures].[Faturamento]', FORMAT_STRING = "##,###.00"
+SELECT ({ [Cliente].[Hierarquia Geográfica].[Nível Cidade].MEMBERS }) ON ROWS,
+( { [Measures].[Faturamento de Vendas]}) ON COLUMNS
+FROM [COMPLETO]
+WHERE ([Tempo].[Ano].&[2014])
+
+// CRIANDO NAMED SET
+WITH
+SET [Cidades] AS
+'[Cliente].[Hierarquia Geográfica].[Nível Cidade].MEMBERS'
+MEMBER [Measures].[Faturamento de Vendas]
+AS
+'[Measures].[Faturamento]', FORMAT_STRING = "##,###.00"
+SELECT ({ [Cidades] }) ON ROWS,
+( { [Measures].[Faturamento de Vendas]}) ON COLUMNS
+FROM [COMPLETO]
+WHERE ([Tempo].[Ano].&[2014])
+
+// ORDERNANDO
+WITH
+SET [Cidades] AS
+'ORDER([Cliente].[Hierarquia Geográfica].[Nível Cidade].MEMBERS, [Measures].[Faturamento], BDESC)'
+MEMBER [Measures].[Faturamento de Vendas]
+AS
+'[Measures].[Faturamento]', FORMAT_STRING = "##,###.00"
+SELECT ({ [Cidades] }) ON ROWS,
+( { [Measures].[Faturamento de Vendas]}) ON COLUMNS
+FROM [COMPLETO]
+WHERE ([Tempo].[Ano].&[2014])
+
+// RANK
+WITH
+SET [Cidades] AS
+'ORDER([Cliente].[Hierarquia Geográfica].[Nível Cidade].MEMBERS, [Measures].[Faturamento], BDESC)'
+MEMBER [Measures].[Faturamento de Vendas]
+AS
+'[Measures].[Faturamento]', FORMAT_STRING = "##,###.00"
+MEMBER [Measures].[Posição no Rank] AS
+'RANK( [Cliente].[Hierarquia Geográfica].Currentmember, [Cidades])' , FORMAT_STRING = "#;#;-"
+SELECT ({ [Cidades] }) ON ROWS,
+( { [Measures].[Faturamento de Vendas], [Measures].[Posição no Rank]}) ON COLUMNS
+FROM [COMPLETO]
+WHERE ([Tempo].[Ano].&[2014])
+
+// RANQUEANDO EM POSIÇÃO NÃO ORDENADA (RANK FUNCIONA P/ LISTAS NÃO ORDENADAS)
+WITH
+SET [Cidades] AS
+'ORDER([Cliente].[Hierarquia Geográfica].[Nível Cidade].MEMBERS, [Measures].[Faturamento], BDESC)'
+MEMBER [Measures].[Faturamento de Vendas]
+AS
+'[Measures].[Faturamento]', FORMAT_STRING = "##,###.00"
+MEMBER [Measures].[Posição no Rank] AS
+'RANK( [Cliente].[Hierarquia Geográfica].Currentmember, [Cidades])' , FORMAT_STRING = "#;#;-"
+SELECT ({ [Cliente].[Hierarquia Geográfica].[Nível Cidade].MEMBERS }) ON ROWS,
+( { [Measures].[Faturamento de Vendas], [Measures].[Posição no Rank]}) ON COLUMNS
+FROM [COMPLETO]
+WHERE ([Tempo].[Ano].&[2014])
+
+// CONT DE ELEMENTOS
+WITH
+SET [Cidades] AS
+'ORDER([Cliente].[Hierarquia Geográfica].[Nível Cidade].MEMBERS, [Measures].[Faturamento], BDESC)'
+MEMBER [Measures].[Faturamento de Vendas]
+AS
+'[Measures].[Faturamento]', FORMAT_STRING = "##,###.00"
+MEMBER [Measures].[Posição no Rank] AS
+'RANK( [Cliente].[Hierarquia Geográfica].Currentmember, [Cidades])' , FORMAT_STRING = "#;#;-"
+MEMBER [Measures].[Contador de Cidades] AS
+'[Cliente].[Hierarquia Geográfica].[Nível Cidade].Count' , FORMAT_STRING = "#;#;-"
+SELECT ({ [Cliente].[Hierarquia Geográfica].[Nível Cidade].MEMBERS }) ON ROWS,
+( { [Measures].[Faturamento de Vendas], [Measures].[Posição no Rank], [Measures].[Contador de Cidades]}) ON COLUMNS
+FROM [COMPLETO]
+WHERE ([Tempo].[Ano].&[2014])

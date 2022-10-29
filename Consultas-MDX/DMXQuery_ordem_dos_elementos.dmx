@@ -1,0 +1,186 @@
+// SELEÇÃO COM CROSSJOIN
+Select Non Empty ( CROSSJOIN ( { [Measures].[Faturamento], [Measures].[Margem] } , { [Cliente].[Estado].&[São Paulo], [Cliente].[Estado].&[Rio de Janeiro] } ) ) On Rows,
+( { [Tempo].[Hierarquia do Mês e Ano].[Ano].&[2013].&[Primeiro Semestre 2013].&[2013]&[01-2013]&[01-2013].&[2013]&[01-2013]&[01-2013]&[01-2013] : 
+[Tempo].[Hierarquia do Mês e Ano].[Ano].&[2013].&[Primeiro Semestre 2013].&[2013]&[01-2013]&[02-2013].&[2013]&[01-2013]&[02-2013]&[06-2013] } ) On Columns
+from [COMPLETO]
+
+// 2 CROSSJOINS NA MESMA SELEÇÃO
+Select Non Empty 
+( CROSSJOIN ( { [Produto].[Marca].&[Frescor do Verão], [Produto].[Marca].&[Pedaços de Frutas] }, 
+( CROSSJOIN ( { [Measures].[Faturamento], [Measures].[Margem] } , { [Cliente].[Estado].&[São Paulo], [Cliente].[Estado].&[Rio de Janeiro] } ) )  ) )
+On Rows,
+( { [Tempo].[Hierarquia do Mês e Ano].[Ano].&[2013].&[Primeiro Semestre 2013].&[2013]&[01-2013]&[01-2013].&[2013]&[01-2013]&[01-2013]&[01-2013] : 
+[Tempo].[Hierarquia do Mês e Ano].[Ano].&[2013].&[Primeiro Semestre 2013].&[2013]&[01-2013]&[02-2013].&[2013]&[01-2013]&[02-2013]&[06-2013] } ) On Columns
+from [COMPLETO]
+
+// CROSSJOIN SEM EXCLUIR OS NULOS (CHANCE DE HAVER NULO É ALTA DEVIDO A MUITOS CRUZAMENTOS PRESENTES)
+Select 
+( CROSSJOIN ( { [Produto].[Produto].Members }, 
+( CROSSJOIN ( { [Measures].[Faturamento], [Measures].[Margem] } , { [Cliente].[Cliente].Members } ) )  ) )
+On Rows,
+( { [Tempo].[Hierarquia do Mês e Ano].[Ano].&[2013].&[Primeiro Semestre 2013].&[2013]&[01-2013]&[01-2013].&[2013]&[01-2013]&[01-2013]&[01-2013] : 
+[Tempo].[Hierarquia do Mês e Ano].[Ano].&[2013].&[Primeiro Semestre 2013].&[2013]&[01-2013]&[02-2013].&[2013]&[01-2013]&[02-2013]&[06-2013] } ) On Columns
+from [COMPLETO]
+
+// CROSS JOIN SEM OS NULOS
+Select Non Empty 
+( CROSSJOIN ( { [Produto].[Produto].Members }, 
+( CROSSJOIN ( { [Measures].[Faturamento], [Measures].[Margem] } , { [Cliente].[Cliente].Members } ) )  ) )
+On Rows,
+( { [Tempo].[Hierarquia do Mês e Ano].[Ano].&[2013].&[Primeiro Semestre 2013].&[2013]&[01-2013]&[01-2013].&[2013]&[01-2013]&[01-2013]&[01-2013] : 
+[Tempo].[Hierarquia do Mês e Ano].[Ano].&[2013].&[Primeiro Semestre 2013].&[2013]&[01-2013]&[02-2013].&[2013]&[01-2013]&[02-2013]&[06-2013] } ) On Columns
+from [COMPLETO]
+
+// SELEÇÃO NA ORDEM DA DIGITAÇÃO DO SELECT
+Select ({ [Cliente].[Estado].&[São Paulo], [Cliente].[Estado].&[Goiais], [Cliente].[Estado].&[Paraná], [Cliente].[Estado].&[Bahia] }) On Rows,
+( { [Tempo].[Semestre e Ano].Members }) On Columns
+from [COMPLETO]
+
+// SELEÇÃO PELA HIERARQUIA DEFINIDA NO SISTEMA
+Select Hierarchize ({ [Cliente].[Estado].&[São Paulo], [Cliente].[Estado].&[Goiais], [Cliente].[Estado].&[Paraná], [Cliente].[Estado].&[Bahia] }) On Rows,
+( { [Tempo].[Semestre e Ano].Members }) On Columns
+from [COMPLETO]
+
+// INVENTENDO AS COLUNAS COM AS LINHAS
+Select ({ [Cliente].[Estado].&[São Paulo], [Cliente].[Estado].&[Goiais], [Cliente].[Estado].&[Paraná], [Cliente].[Estado].&[Bahia] }) On Columns,
+( { [Tempo].[Semestre e Ano].Members }) On Rows
+from [COMPLETO]
+
+// HIERARQUIA DEFINIDA PARA AS COLUNAS
+Select Hierarchize ({ [Cliente].[Estado].&[São Paulo], [Cliente].[Estado].&[Goiais], [Cliente].[Estado].&[Paraná], [Cliente].[Estado].&[Bahia] }) On Columns,
+( { [Tempo].[Semestre e Ano].Members }) On Rows
+from [COMPLETO]
+
+// FATURAMENTO SEM ORDEM ESPECÍFICA DE VALORES
+SELECT ({[Produto].[Marca].&[Festival de Sabores], [Produto].[Marca].&[Pedaços de Frutas], [Produto].[Marca].&[Sabor da Montanha]}) ON ROWS,
+({ [Tempo].[Ano].&[2014] }) ON Columns
+from [COMPLETO]
+
+// FATURAMENTO ORDENADO DESCENDENTE
+SELECT ORDER (
+({[Produto].[Marca].&[Festival de Sabores], [Produto].[Marca].&[Pedaços de Frutas], [Produto].[Marca].&[Sabor da Montanha]}) ,
+[Measures].[Faturamento], DESC)
+ON ROWS,
+({ [Tempo].[Ano].&[2014] }) ON Columns
+from [COMPLETO]
+
+// FATURAMENTO ORDENADO ASCENDENTE
+SELECT ORDER (
+({[Produto].[Marca].&[Festival de Sabores], [Produto].[Marca].&[Pedaços de Frutas], [Produto].[Marca].&[Sabor da Montanha]}) ,
+[Measures].[Faturamento], ASC)
+ON ROWS,
+({ [Tempo].[Ano].&[2014] }) ON Columns
+from [COMPLETO]
+
+// ORDER COM CROSSJOIN RESPEITANDO HIERARQUIA
+SELECT ORDER (
+CROSSJOIN (
+({[Cliente].[Cidade].&[Rio de Janeiro], [Cliente].[Cidade].&[São Paulo], [Cliente].[Cidade].&[Belo Horizonte]}),
+({[Produto].[Marca].&[Festival de Sabores], [Produto].[Marca].&[Pedaços de Frutas], [Produto].[Marca].&[Sabor da Montanha]}) 
+)
+,[Measures].[Faturamento], ASC
+)
+ON ROWS,
+({ [Tempo].[Ano].&[2014] }) ON Columns
+from [COMPLETO]
+WHERE ({ [Measures].[Faturamento] })
+
+// ORDENADO ORDER E CROSSJOIN SEM HIERARQUIA
+SELECT ORDER (
+CROSSJOIN (
+({[Cliente].[Cidade].&[Rio de Janeiro], [Cliente].[Cidade].&[São Paulo], [Cliente].[Cidade].&[Belo Horizonte]}),
+({[Produto].[Marca].&[Festival de Sabores], [Produto].[Marca].&[Pedaços de Frutas], [Produto].[Marca].&[Sabor da Montanha]}) 
+)
+,[Measures].[Faturamento], BASC
+)
+ON ROWS,
+({ [Tempo].[Ano].&[2014] }) ON Columns
+from [COMPLETO]
+WHERE ({ [Measures].[Faturamento] })
+
+// IDEM DESC
+SELECT ORDER (
+CROSSJOIN (
+({[Cliente].[Cidade].&[Rio de Janeiro], [Cliente].[Cidade].&[São Paulo], [Cliente].[Cidade].&[Belo Horizonte]}),
+({[Produto].[Marca].&[Festival de Sabores], [Produto].[Marca].&[Pedaços de Frutas], [Produto].[Marca].&[Sabor da Montanha]}) 
+)
+,[Measures].[Faturamento], BDESC
+)
+ON ROWS,
+({ [Tempo].[Ano].&[2014] }) ON Columns
+from [COMPLETO]
+WHERE ({ [Measures].[Faturamento] })
+
+// CRITÉRIO DE SELEÇÃO DIFERENTE DO INDICADOR EXIBIDO NA CONSULTA
+SELECT ORDER (
+CROSSJOIN (
+({[Cliente].[Cidade].&[Rio de Janeiro], [Cliente].[Cidade].&[São Paulo], [Cliente].[Cidade].&[Belo Horizonte]}),
+({[Produto].[Marca].&[Festival de Sabores], [Produto].[Marca].&[Pedaços de Frutas], [Produto].[Marca].&[Sabor da Montanha]})) ,[Measures].[Margem], BDESC )
+ON ROWS,
+({ [Tempo].[Ano].&[2014] }) ON Columns
+from [COMPLETO]
+WHERE ({ [Measures].[Faturamento] })
+
+// USO DE FILTRO NA BUSCA
+Select 
+FILTER (
+({ [Produto].[Hierarquia de Produtos].[Nível Marca].members })
+,  [Measures].[Faturamento] >= 10000000)
+On Rows,
+( {[Measures].[Faturamento]} ) On Columns
+from [COMPLETO]
+where ([Tempo].[Ano].&[2014])
+
+// FILTRO COM ORDER
+Select 
+FILTER (
+ORDER (
+({ [Produto].[Hierarquia de Produtos].[Nível Marca].members })
+, [Measures].[Faturamento], BDESC
+)
+,  [Measures].[Faturamento] >= 10000000)
+On Rows,
+( {[Measures].[Faturamento]} ) On Columns
+from [COMPLETO]
+where ([Tempo].[Ano].&[2014])
+
+// IDEM COM OUTRO CRITÉRIO DE CORTE
+Select 
+FILTER (
+ORDER (
+({ [Produto].[Hierarquia de Produtos].[Nível Marca].members })
+, [Measures].[Faturamento], BDESC
+)
+,  [Measures].[Faturamento] >= 7000000)
+On Rows,
+( {[Measures].[Faturamento]} ) On Columns
+from [COMPLETO]
+where ([Tempo].[Ano].&[2014])
+
+// O FILTRO SÓ PODE SER USADO COM O INDICADOR NA COLUNA E SEM CROSSJOIN
+Select 
+FILTER (
+ORDER (
+({ [Produto].[Hierarquia de Produtos].[Nível Marca].members })
+, [Measures].[Faturamento], BDESC
+)
+,  [Measures].[Faturamento] >= 7000000)
+On Rows,
+( {[Tempo].[Ano].&[2014]} ) On Columns
+from [COMPLETO]
+where ({[Measures].[Faturamento]})
+
+// PARA A SELEÇÃO DO WHERE É PRECISO USAR CROSSJOIN
+Select 
+FILTER (
+ORDER (
+CROSSJOIN (
+({ [Tempo].[Ano].&[2014] }),
+({ [Produto].[Hierarquia de Produtos].[Nível Marca].members })
+)
+, [Measures].[Faturamento], BDESC
+)
+,  [Measures].[Faturamento] >= 7000000)
+On Rows,
+( {[Measures].[Faturamento]} ) On Columns
+from [COMPLETO]

@@ -1,0 +1,232 @@
+// CALCULOS NOS ELEMENTOS OLAP
+
+// CONSULTA CATEGORIA E MEDIDAS
+SELECT ({[Produto].[Categoria].MEMBERS}) On Rows,
+({[Measures].[Faturamento], [Measures].[Faturamento Líquido]}) On Columns
+from [COMPLETO]
+where ([Tempo].[Ano].&[2014])
+
+// CRIAÇÃO DE MEMBRO CALCULADO
+WITH
+MEMBER [Measures].[Novo Faturarento Líquido] AS
+'[Measures].[Faturamento] - [Measures].[Frete Rateio] - [Measures].[Imposto]'
+SELECT ({[Produto].[Categoria].MEMBERS}) On Rows,
+({[Measures].[Faturamento], [Measures].[Faturamento Líquido], [Measures].[Novo Faturarento Líquido]}) On Columns
+from [COMPLETO]
+where ([Tempo].[Ano].&[2014])
+
+// CALCULAR MAIS DE UM MEMBRO NO MESMO MDX
+WITH
+MEMBER [Measures].[Novo Faturarento Líquido] AS
+'[Measures].[Faturamento] - [Measures].[Frete Rateio] - [Measures].[Imposto]'
+MEMBER [Measures].[Variação Faturamento] AS
+'[Measures].[Novo Faturarento Líquido] / [Measures].[Faturamento]'
+SELECT ({[Produto].[Categoria].MEMBERS}) On Rows,
+({[Measures].[Faturamento], [Measures].[Faturamento Líquido], [Measures].[Novo Faturarento Líquido],
+[Measures].[Variação Faturamento]}) On Columns
+from [COMPLETO]
+where ([Tempo].[Ano].&[2014])
+
+// ADICIONANDO PROPRIEDADES AOS MEMBROS CALCULADOS
+WITH
+MEMBER [Measures].[Novo Faturarento Líquido] AS
+'[Measures].[Faturamento] - [Measures].[Frete Rateio] - [Measures].[Imposto]', 
+FORMAT_STRING = '#,###.##'
+MEMBER [Measures].[Variação Faturamento] AS
+'[Measures].[Novo Faturarento Líquido] / [Measures].[Faturamento]', 
+FORMAT_STRING = '#,###.## %'
+SELECT ({[Produto].[Categoria].MEMBERS}) On Rows,
+({[Measures].[Faturamento], [Measures].[Faturamento Líquido], [Measures].[Novo Faturarento Líquido],
+[Measures].[Variação Faturamento]}) On Columns
+from [COMPLETO]
+where ([Tempo].[Ano].&[2014])
+
+// CONSULTA QQER
+SELECT ({[Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[01-2013], [Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[02-2013]}) on columns,
+({[Produto].[Marca].members}) on rows
+from [COMPLETO]
+
+// CONSULTA COM CÁLCULO ENTRE COLUNAS PRÓPRIAS
+WITH
+MEMBER [Tempo].[Mês e Ano].[Var Fev Jan] AS
+'(1 - ([Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[01-2013] / [Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[02-2013]))',
+FORMAT_STRING = '#,###.00 %'
+SELECT ({[Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[01-2013], [Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[02-2013], 
+[Tempo].[Mês e Ano].[Var Fev Jan]}) on columns,
+({[Produto].[Marca].members}) on rows
+from [COMPLETO]
+where ([Measures].[Faturamento])
+
+// CONSULTA DE MESES PELA MARGEM
+SELECT ({
+[Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[01-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[02-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[03-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[02-2013]&[04-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[02-2013]&[05-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[02-2013]&[06-2013]}) ON ROWS,
+[Measures].[Margem] ON COLUMNS
+FROM [COMPLETO]
+
+// LINHA DE SOMA DAS DEMAIS
+WITH MEMBER
+[Tempo].[Mês e Ano].[Soma] AS
+'SUM({
+[Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[01-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[02-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[03-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[02-2013]&[04-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[02-2013]&[05-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[02-2013]&[06-2013]},[Measures].[Margem])'
+SELECT ({
+[Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[01-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[02-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[03-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[02-2013]&[04-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[02-2013]&[05-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[02-2013]&[06-2013]
+,[Tempo].[Mês e Ano].[Soma]}) ON ROWS,
+[Measures].[Margem] ON COLUMNS
+FROM [COMPLETO]
+where ([Measures].[Faturamento])
+
+// FUNÇÃO DE MÉDIA DOS MESES
+WITH MEMBER
+[Tempo].[Mês e Ano].[Média] AS
+'AVG({
+[Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[01-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[02-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[03-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[02-2013]&[04-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[02-2013]&[05-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[02-2013]&[06-2013]},[Measures].[Margem])'
+SELECT ({
+[Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[01-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[02-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[03-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[02-2013]&[04-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[02-2013]&[05-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[02-2013]&[06-2013]
+,[Tempo].[Mês e Ano].[Média]}) ON ROWS,
+[Measures].[Margem] ON COLUMNS
+FROM [COMPLETO]
+
+// FUNÇÃO MÁXIMO
+WITH MEMBER
+[Tempo].[Mês e Ano].[Máximo] AS
+'MAX({
+[Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[01-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[02-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[03-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[02-2013]&[04-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[02-2013]&[05-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[02-2013]&[06-2013]},[Measures].[Margem])'
+SELECT ({
+[Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[01-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[02-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[03-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[02-2013]&[04-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[02-2013]&[05-2013]
+,[Tempo].[Mês e Ano].&[2013]&[01-2013]&[02-2013]&[06-2013]
+,[Tempo].[Mês e Ano].[Máximo]}) ON ROWS,
+[Measures].[Margem] ON COLUMNS
+FROM [COMPLETO]
+
+// CONSULTA DE MESES POR FATURAMENTO LÍQUIDO
+SELECT ({ 
+[Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[01-2013],
+[Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[02-2013],
+[Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[03-2013],
+[Tempo].[Mês e Ano].&[2013]&[01-2013]&[02-2013]&[04-2013],
+[Tempo].[Mês e Ano].&[2013]&[01-2013]&[02-2013]&[05-2013],
+[Tempo].[Mês e Ano].&[2013]&[01-2013]&[02-2013]&[06-2013]}) on rows,
+[Measures].[Faturamento Líquido] on columns
+from [COMPLETO]
+
+// NOMEANDO CONJUNTO: NAMED SET
+WITH SET [6 Primeiros Meses de 2013] AS
+'{ 
+[Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[01-2013],
+[Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[02-2013],
+[Tempo].[Mês e Ano].&[2013]&[01-2013]&[01-2013]&[03-2013],
+[Tempo].[Mês e Ano].&[2013]&[01-2013]&[02-2013]&[04-2013],
+[Tempo].[Mês e Ano].&[2013]&[01-2013]&[02-2013]&[05-2013],
+[Tempo].[Mês e Ano].&[2013]&[01-2013]&[02-2013]&[06-2013]}'
+MEMBER [Tempo].[Mês e Ano].[Soma dos Primeiros Meses de 2013] AS
+'SUM( [6 Primeiros Meses de 2013], [Measures].[Faturamento Líquido])'
+SELECT ({[6 Primeiros Meses de 2013], [Tempo].[Mês e Ano].[Soma dos Primeiros Meses de 2013]}) on rows,
+[Measures].[Faturamento Líquido] on columns
+from [COMPLETO]
+
+//CÁLCULO ENTRE MEMBROS
+
+// FATURAMENTO NOS MESES
+SELECT NON EMPTY 
+({[Tempo].[Hierarquia do Mês e Ano].[Ano].&[2013].&[Primeiro Semestre 2013].&[2013]&[01-2013]&[01-2013].Children}) on Rows,
+({[Measures].[Faturamento]}) on Columns from [COMPLETO]
+
+// COLUNA DE TAXA DE VARUAÇÃO ENTRE OS MEMBROS (ATRIBUTO ESTÁTICO) 
+WITH MEMBER [Measures].[% Taxa Variação] AS
+'[Measures].[Faturamento] / 
+( [Measures].[Faturamento] , [Tempo].[Hierarquia do Mês e Ano].[Ano].&[2013].&[Primeiro Semestre 2013].&[2013]&[01-2013]&[01-2013] )'
+, FORMAT_STRING = '#,###.## %'
+SELECT NON EMPTY 
+({[Tempo].[Hierarquia do Mês e Ano].[Ano].&[2013].&[Primeiro Semestre 2013].&[2013]&[01-2013]&[01-2013].Children}) on Rows,
+({[Measures].[Faturamento], [Measures].[% Taxa Variação]}) on Columns from [COMPLETO]
+
+// COLUNA DE TAXA DE VARUAÇÃO ENTRE OS MEMBROS (ATRIBUTO DINÂMICO) 
+WITH MEMBER [Measures].[% Taxa Variação] AS
+'[Measures].[Faturamento] / 
+( [Measures].[Faturamento] , [Tempo].[Hierarquia do Mês e Ano].Currentmember.Parent )'
+, FORMAT_STRING = '#,###.## %'
+SELECT NON EMPTY 
+({[Tempo].[Hierarquia do Mês e Ano].[Ano].&[2013].&[Primeiro Semestre 2013].&[2013]&[01-2013]&[01-2013].Children}) on Rows,
+({[Measures].[Faturamento], [Measures].[% Taxa Variação]}) on Columns from [COMPLETO]
+
+// IDEM PARA MESES
+WITH MEMBER [Measures].[% Taxa Variação] AS
+'[Measures].[Faturamento] / 
+( [Measures].[Faturamento] , [Tempo].[Hierarquia do Mês e Ano].Currentmember.Parent )'
+, FORMAT_STRING = '#,###.## %'
+SELECT NON EMPTY 
+({[Tempo].[Hierarquia do Mês e Ano].[Ano].&[2013].&[Primeiro Semestre 2013].Children}) on Rows,
+({[Measures].[Faturamento], [Measures].[% Taxa Variação]}) on Columns from [COMPLETO]
+
+// IDEM TRIMESTRE
+WITH MEMBER [Measures].[% Taxa Variação Trimestre] AS
+'[Measures].[Faturamento] / 
+( [Measures].[Faturamento] , [Tempo].[Hierarquia do Mês e Ano].Currentmember.Parent )'
+, FORMAT_STRING = '#,###.## %'
+SELECT NON EMPTY 
+({[Tempo].[Hierarquia do Mês e Ano].[Nível Mês e Ano].Members}) on Rows,
+({[Measures].[Faturamento], [Measures].[% Taxa Variação Trimestre]}) on Columns from [COMPLETO]
+
+// VARIAÇÃO DO SEMESTRE TOMANDO O MÊS COMO BASE
+WITH MEMBER [Measures].[% Taxa Variação Trimestre] AS
+'[Measures].[Faturamento] / 
+( [Measures].[Faturamento] , [Tempo].[Hierarquia do Mês e Ano].Currentmember.Parent )'
+, FORMAT_STRING = '#,###.## %'
+ MEMBER [Measures].[% Taxa Variação Semestre] AS
+'[Measures].[Faturamento] / 
+( [Measures].[Faturamento] , [Tempo].[Hierarquia do Mês e Ano].Currentmember.Parent.Parent )'
+, FORMAT_STRING = '#,###.## %'
+SELECT NON EMPTY 
+({[Tempo].[Hierarquia do Mês e Ano].[Nível Mês e Ano].Members}) on Rows,
+({[Measures].[Faturamento], [Measures].[% Taxa Variação Trimestre], [% Taxa Variação Semestre]}) on Columns from [COMPLETO]
+
+// PARENT RESURSIVO
+WITH MEMBER [Measures].[% Taxa Variação Trimestre] AS
+'[Measures].[Faturamento] / 
+( [Measures].[Faturamento] , [Tempo].[Hierarquia do Mês e Ano].Currentmember.Parent )'
+, FORMAT_STRING = '#,###.## %'
+ MEMBER [Measures].[% Taxa Variação Semestre] AS
+'[Measures].[Faturamento] / 
+( [Measures].[Faturamento] , [Tempo].[Hierarquia do Mês e Ano].Currentmember.Parent.Parent )'
+, FORMAT_STRING = '#,###.## %'
+MEMBER [Measures].[% Taxa Variação Ano] AS
+'[Measures].[Faturamento] / 
+( [Measures].[Faturamento] , [Tempo].[Hierarquia do Mês e Ano].Currentmember.Parent.Parent.Parent )'
+, FORMAT_STRING = '#,###.## %'
+SELECT NON EMPTY 
+({[Tempo].[Hierarquia do Mês e Ano].[Nível Mês e Ano].Members}) on Rows,
+({[Measures].[Faturamento], [Measures].[% Taxa Variação Trimestre], [% Taxa Variação Semestre], [% Taxa Variação Ano]}) on Columns from [COMPLETO]

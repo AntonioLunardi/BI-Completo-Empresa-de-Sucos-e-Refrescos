@@ -1,0 +1,149 @@
+// PERÍODOS DE TEMPO
+
+// CONSULTA
+select non empty {[Tempo].[Hierarquia do Mês e Ano].[Nível Mês e Ano].members} on rows,
+{[Measures].[Faturamento]} on columns
+from [COMPLETO]
+
+// VARIAÇÃO DE CADA MÊS EM RELAÇÃO AO ANTERIOR
+WITH MEMBER [Measures].[Variação Faturamento] AS
+'[Measures].[Faturamento] - ([Measures].[Faturamento], [Tempo].[Hierarquia do Mês e Ano].Currentmember.PrevMember )',
+FORMAT_STRING = "##,###.00"
+select non empty {[Tempo].[Hierarquia do Mês e Ano].[Nível Mês e Ano].members} on rows,
+{[Measures].[Faturamento], [Measures].[Variação Faturamento]} on columns
+from [COMPLETO]
+
+// MAIS VARIAÇÃO EM PERCENTUAL
+WITH MEMBER [Measures].[Variação Faturamento] AS
+'[Measures].[Faturamento] - ([Measures].[Faturamento], [Tempo].[Hierarquia do Mês e Ano].Currentmember.PrevMember )',
+FORMAT_STRING = "##,###.00"
+MEMBER [Measures].[Variação Faturamento Percentual] AS
+'(([Measures].[Faturamento], [Tempo].[Hierarquia do Mês e Ano].Currentmember)/
+([Measures].[Faturamento], [Tempo].[Hierarquia do Mês e Ano].Currentmember.PrevMember )) - 1',
+FORMAT_STRING = "##,###.00 %"
+select non empty {[Tempo].[Hierarquia do Mês e Ano].[Nível Mês e Ano].members} on rows,
+{[Measures].[Faturamento], [Measures].[Variação Faturamento], [Measures].[Variação Faturamento Percentual] } on columns
+from [COMPLETO]
+
+// PERÍODOS SUBSEQUENTES
+
+// CONSULTA
+SELECT ({[Tempo].[Hierarquia do Mês e Ano].[Nível Mês e Ano].Members}) On Rows,
+({[Measures].[Faturamento]}) On Columns
+FROM [COMPLETO]
+
+// FATURAMENTO 2 MESES ATRÁS
+WITH MEMBER [Measures].[Faturamento Desce 2]
+AS
+'([Measures].[Faturamento], ParallelPeriod([Tempo].[Hierarquia do Mês e Ano].[Nível Mês e Ano], 2, [Tempo].[Hierarquia do Mês e Ano].Currentmember))',
+FORMAT_STRING = "#,###.00"
+SELECT ({[Tempo].[Hierarquia do Mês e Ano].[Nível Mês e Ano].Members}) On Rows,
+({[Measures].[Faturamento], [Measures].[Faturamento Desce 2]}) On Columns
+FROM [COMPLETO]
+
+// 6 MESES ANTES
+WITH MEMBER [Measures].[Faturamento Desce 6]
+AS
+'([Measures].[Faturamento], ParallelPeriod([Tempo].[Hierarquia do Mês e Ano].[Nível Mês e Ano], 6, [Tempo].[Hierarquia do Mês e Ano].Currentmember))',
+FORMAT_STRING = "#,###.00"
+SELECT ({[Tempo].[Hierarquia do Mês e Ano].[Nível Mês e Ano].Members}) On Rows,
+({[Measures].[Faturamento], [Measures].[Faturamento Desce 6]}) On Columns
+FROM [COMPLETO]
+
+// 6 MESES DEPOIS
+WITH MEMBER [Measures].[Faturamento Sobe 6]
+AS
+'([Measures].[Faturamento], ParallelPeriod([Tempo].[Hierarquia do Mês e Ano].[Nível Mês e Ano], -6, [Tempo].[Hierarquia do Mês e Ano].Currentmember))',
+FORMAT_STRING = "#,###.00"
+SELECT ({[Tempo].[Hierarquia do Mês e Ano].[Nível Mês e Ano].Members}) On Rows,
+({[Measures].[Faturamento], [Measures].[Faturamento Sobe 6]}) On Columns
+FROM [COMPLETO]
+
+// 12 MESES ANTES
+WITH MEMBER [Measures].[Variação Faturamento Ano]
+AS '([Measures].[Faturamento])/
+([Measures].[Faturamento], ParallelPeriod([Tempo].[Hierarquia do Mês e Ano].[Nível Mês e Ano], 12, 
+[Tempo].[Hierarquia do Mês e Ano].Currentmember)) -1',
+FORMAT_STRING = "#,###.00 %"
+SELECT ({[Tempo].[Hierarquia do Mês e Ano].[Nível Mês e Ano].Members}) On Rows,
+({[Measures].[Faturamento], [Measures].[Variação Faturamento Ano]}) On Columns
+FROM [COMPLETO]
+
+// PERÍODOS ATÉ A DATA
+
+// CONSULTA
+SELECT NON EMPTY ({[Tempo].[Hierarquia do Mês e Ano].[Nível Mês e Ano].MEMBERS})  ON ROWS,
+({[Measures].[Faturamento]}) ON COLUMNS
+FROM [COMPLETO]
+
+// SOMA ACUMULADA
+WITH MEMBER
+[Measures].[FATURAMENTO YTD] AS
+'Sum(PeriodsToDate([Tempo].[Hierarquia do Mês e Ano].[Ano], [Tempo].[Hierarquia do Mês e Ano].Currentmember),[Measures].[Faturamento])',
+FORMAT_STRING = "##,###.00"
+SELECT NON EMPTY ({[Tempo].[Hierarquia do Mês e Ano].[Nível Mês e Ano].MEMBERS})  ON ROWS,
+({[Measures].[Faturamento], [Measures].[FATURAMENTO YTD]}) ON COLUMNS
+FROM [COMPLETO]
+
+// ACUMULADO TRIMESTRE
+WITH MEMBER
+[Measures].[FATURAMENTO YTD] AS
+'Sum(PeriodsToDate([Tempo].[Hierarquia do Mês e Ano].[Ano], [Tempo].[Hierarquia do Mês e Ano].Currentmember),[Measures].[Faturamento])',
+FORMAT_STRING = "##,###.00"
+MEMBER
+[Measures].[FATURAMENTO QTY] AS
+'Sum(PeriodsToDate([Tempo].[Hierarquia do Mês e Ano].[Nível Trimestre e Ano], [Tempo].[Hierarquia do Mês e Ano].Currentmember),[Measures].[Faturamento])',
+FORMAT_STRING = "##,###.00"
+SELECT NON EMPTY ({[Tempo].[Hierarquia do Mês e Ano].[Nível Mês e Ano].MEMBERS})  ON ROWS,
+({[Measures].[Faturamento], [Measures].[FATURAMENTO YTD], [Measures].[FATURAMENTO QTY]}) ON COLUMNS
+FROM [COMPLETO]
+
+// DESLOCAMENTO NA DIMENSÃO
+
+// CONSULTA
+SELECT NON EMPTY ({[Tempo].[Hierarquia do Mês e Ano].[Ano].&[2014].&[Primeiro Semestre 2014].&[2014]&[01-2014]&[02-2014].&[2014]&[01-2014]&[02-2014]&[06-2014]}) ON ROWS,
+({[Measures].[Faturamento]}) ON COLUMNS
+FROM [COMPLETO]
+
+// DESLOCAMENTO PARA A ESQUERDA
+SELECT NON EMPTY ({
+[Tempo].[Hierarquia do Mês e Ano].[Ano].&[2014].&[Primeiro Semestre 2014].&[2014]&[01-2014]&[02-2014].&[2014]&[01-2014]&[02-2014]&[06-2014],
+[Tempo].[Hierarquia do Mês e Ano].[Ano].&[2014].&[Primeiro Semestre 2014].&[2014]&[01-2014]&[02-2014].&[2014]&[01-2014]&[02-2014]&[06-2014].Lag(3)
+}) ON ROWS,
+({[Measures].[Faturamento]}) ON COLUMNS
+FROM [COMPLETO]
+
+// SELECIONAR CONJUNTO A PARTIR DE UM PONTO
+SELECT NON EMPTY ({
+LastPeriods(6,
+[Tempo].[Hierarquia do Mês e Ano].[Ano].&[2014].&[Primeiro Semestre 2014].&[2014]&[01-2014]&[02-2014].&[2014]&[01-2014]&[02-2014]&[06-2014])
+}) ON ROWS,
+({[Measures].[Faturamento]}) ON COLUMNS
+FROM [COMPLETO]
+
+// VALOR NEGATIVO EM LAST PERIODS
+SELECT NON EMPTY ({
+LastPeriods(-6,
+[Tempo].[Hierarquia do Mês e Ano].[Ano].&[2014].&[Primeiro Semestre 2014].&[2014]&[01-2014]&[02-2014].&[2014]&[01-2014]&[02-2014]&[06-2014])
+}) ON ROWS,
+({[Measures].[Faturamento]}) ON COLUMNS
+FROM [COMPLETO]
+
+// HEAD
+SELECT NON EMPTY ({
+Head (
+LastPeriods(-6,
+[Tempo].[Hierarquia do Mês e Ano].[Ano].&[2014].&[Primeiro Semestre 2014].&[2014]&[01-2014]&[02-2014].&[2014]&[01-2014]&[02-2014]&[06-2014]),2)
+}) ON ROWS,
+({[Measures].[Faturamento]}) ON COLUMNS
+FROM [COMPLETO]
+
+// TAIL
+SELECT NON EMPTY ({
+Tail(
+LastPeriods(-6,
+[Tempo].[Hierarquia do Mês e Ano].[Ano].&[2014].&[Primeiro Semestre 2014].&[2014]&[01-2014]&[02-2014].&[2014]&[01-2014]&[02-2014]&[06-2014])
+,2)
+}) ON ROWS,
+({[Measures].[Faturamento]}) ON COLUMNS
+FROM [COMPLETO]
