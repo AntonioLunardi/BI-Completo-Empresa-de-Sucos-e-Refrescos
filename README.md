@@ -1,6 +1,6 @@
 # Empresa-de-sucos-e-refrescos
 
-![ok](http://drive.google.com/file/d/1JDgGtB78fLmBhVBdvnkT5-QQ9c2WdXQ0/view?usp=sharing)
+![](sucos.png#vitrinedev)
 
 Frameworks: MS SQL Server, MS Integrations Services, MS Analysis Services
 
