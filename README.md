@@ -1,4 +1,7 @@
 # Empresa-de-sucos-e-refrescos
+
+![](https://drive.google.com/file/d/1JDgGtB78fLmBhVBdvnkT5-QQ9c2WdXQ0/view?usp=sharing#vitrinedev)
+
 Frameworks: MS SQL Server, MS Integrations Services, MS Analysis Services
 
 Projeto de criação completa de DW, ETL e OLAP a partir das necessidades de uma empresa de suco de frutas.
