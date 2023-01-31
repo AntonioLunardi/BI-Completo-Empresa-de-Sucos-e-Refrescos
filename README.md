@@ -1,6 +1,6 @@
 # Empresa-de-sucos-e-refrescos
 
-![](sucos.png#vitrinedev)
+![](/sucos.bmp#vitrinedev)
 
 Frameworks: MS SQL Server, MS Integrations Services, MS Analysis Services
 
