@@ -1,8 +1,11 @@
-# Empresa-de-sucos-e-refrescos
+# BI Completo Empresa de sucos e refrescos
+
+| :placard: Vitrine.Dev |     |
+| -------------  | --- |
+| :sparkles: Nome        | **BI-Completo-Empresa-de-sucos-e-refrescos**
+| :label: Tecnologias | SQL Server, Integration Services, Analysis Services
 
 ![](/sucos.bmp#vitrinedev)
-
-Frameworks: MS SQL Server, MS Integrations Services, MS Analysis Services
 
 Projeto de criação completa de DW, ETL e OLAP a partir das necessidades de uma empresa de suco de frutas.
 Também há diversas consultas MDX que foram feitas depois que o projeto estava completo.
