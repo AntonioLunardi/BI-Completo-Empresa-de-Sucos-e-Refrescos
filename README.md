@@ -4,7 +4,7 @@ O projeto visa a criar uma estrutura de bancos de dados completa, passando por t
 | :placard: Vitrine.Dev |     |
 | -------------  | --- |
 | :sparkles: Nome        | **BI-Completo-Empresa-de-Sucos-e-Refrescos**
-| :label: Tecnologias | SQL Server, Integration Services, Analysis Services, MDX
+| :label: Tecnologias | Power BI, SQL Server, Integration Services, Analysis Services, MDX
 
 ![](/sucos.bmp#vitrinedev)
 
