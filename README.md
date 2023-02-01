@@ -1,4 +1,5 @@
 # BI Completo Empresa de sucos e refrescos
+O projeto visa a criar uma estrutura de bancos de dados completa, passando por todas as etapas de business intelligence.
 
 | :placard: Vitrine.Dev |     |
 | -------------  | --- |
